@@ -1,11 +1,25 @@
 const express = require('express');
+const RecursoIndevidoErro = require('../errors/RecursoIndevidoErro');
 
 module.exports = (app) => {
-    const router = express.Router()
+    const router = express.Router();
+
+
+    router.param('id', (req, res, next) => {
+        app.services.account.findById({id: req.params.id})
+            .then((acc) => {
+                if(acc.user_id !== req.user.id){
+                    throw new RecursoIndevidoErro();
+                } else {
+                    next();
+                }
+            })
+            .catch(err => next(err)) 
+    })
 
     router.post('/', async (req, res, next) => {
         try {
-            const result = await app.services.account.save(req.body)
+            const result = await app.services.account.save({...req.body, user_id: req.user.id})
             return res.status(201).json(result[0]);
         } catch (err) {
             return next(err)
@@ -13,7 +27,7 @@ module.exports = (app) => {
     })
 
     router.get('/', async (req, res, next) => {
-        app.services.account.findAll()
+        app.services.account.findAll(req.user.id)
             .then(result => res.status(200).json(result))
             .catch(err => next(err))
     })
