@@ -63,16 +63,6 @@ test('Não deve inserir uma conta de nome duplicado, para o mesmo usuário', () 
         })
 })
 
-test.skip('Deve listar todas as contas', () => {
-    return app.db('accounts')
-        .insert({ name: 'Acc list', user_id: user.id })
-        .then(() => request(app).get(MAIN_ROUTE).set('authorization', `bearer ${user.token}`))
-        .then((res) => {
-            expect(res.status).toBe(200);
-            expect(res.body.length).toBeGreaterThan(0);
-        })
-})
-
 test('Deve retornar uma conta por Id', () => {
     return app.db('accounts')
         .insert({ name: 'Acc By Id', user_id: user.id }, ['id'])
